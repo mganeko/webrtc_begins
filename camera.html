@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Camera</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f1f1f1;
+      font-family: Arial, Helvetica, sans-serif;
+    ">
+    <h2>Camera</h2>
+    <button id="start_video_button" onclick="startVideo()">Start Video</button>
+    <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
+    <br />
+    <video id="video" width="240" height="240"
+      style="border: 1px solid gray;" // border-radius: 50%; filter:grayscale(100%);"
+    ></video>
+    <!-- css translform: scale(1.5) では、要素全体が大きくなってしまう。映像だけ大きくすることができない-->
+    <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+
+    <br />
+    <button id="start_capture_button" onclick="startCapture()">Start Capture</button>
+    <button id="stop_capture_button" onclick="stopCapture()">Stop Capture</button>
+    <br />
+    <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
+    <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
+    <br />
+    <canvas id="canvas" width="240" height="240" style="border: 1px solid gray;"></canvas>
+    <br />
+  </body>
+  <script>
+    const video = document.getElementById("video");
+    const playbackVideo = document.getElementById("playback_video");
+    let capturedStream = null;
+
+    async function startVideo() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        .catch(e => {
+          console.error(e);
+          return;
+        });
+      video.srcObject = stream;
+      await video.play().catch(e => console.error(e));
+    }
+
+    function stopVideo() {
+      const stream = video.srcObject;
+      if (!stream) {
+        return;
+      }
+
+      const tracks = stream.getTracks();
+      tracks.forEach(function(track) {
+        track.stop();
+      });
+
+      video.pause();
+      video.srcObject = null;
+    }
+
+    function startCapture() {
+      capturedStream = video.captureStream();
+      playbackVideo.srcObject = capturedStream;
+      playbackVideo.play();
+    }
+
+    function stopCapture() {
+      if (!capturedStream) {
+        return;
+      }
+
+      const tracks = capturedStream.getTracks();
+      tracks.forEach(function(track) {
+        track.stop();
+      });
+
+      playbackVideo.pause();
+      playbackVideo.srcObject = null;
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let requestId = null;
+    function startDraw() {
+      requestId = requestAnimationFrame(draw);
+    }
+
+    function stopDraw() {
+      if (requestId) {
+        cancelAnimationFrame(requestId);
+        requestId = null;
+      }
+    }
+
+    function draw() {
+      ctx.drawImage(video,
+        //video.videoWidth/2 - video.videoHeight/2, 0, video.videoWidth/2 + video.videoHeight/2, video.videoHeight, // src
+        video.videoWidth/2 - video.videoHeight/2, 0, video.videoHeight, video.videoHeight, // src (left, top, width, height)
+        0, 0, canvas.width, canvas.height // dest (left, top, width, height)
+      );
+
+      requestId = requestAnimationFrame(draw);
+    }
+
+  </script>
+</html>
