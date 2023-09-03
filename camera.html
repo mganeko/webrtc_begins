@@ -23,8 +23,11 @@
     <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
 
     <br />
-    <button id="start_capture_button" onclick="startCapture()">Start Capture</button>
-    <button id="stop_capture_button" onclick="stopCapture()">Stop Capture</button>
+    <button id="start_capture_button" onclick="startCapture()">Start Capture(video)</button>
+    <button id="stop_capture_button" onclick="stopCapture()">Stop Capture(video)</button>
+    &nbsp;
+    <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture(canvas)</button>
+    <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture(canvas)</button>
     <br />
     <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
     <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
@@ -36,6 +39,7 @@
     const video = document.getElementById("video");
     const playbackVideo = document.getElementById("playback_video");
     let capturedStream = null;
+    let capturedCanvasStream = null;
 
     async function startVideo() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true })
@@ -110,6 +114,26 @@
       );
 
       requestId = requestAnimationFrame(draw);
+    }
+
+    function startCaptureCanvas() {
+      capturedCanvasStream = canvas.captureStream();
+      playbackVideo.srcObject = capturedCanvasStream;
+      playbackVideo.play();
+    }
+
+    function stopCaptureCanvas() {
+      if (!capturedCanvasStream) {
+        return;
+      }
+
+      const tracks = capturedCanvasStream.getTracks();
+      tracks.forEach(function(track) {
+        track.stop();
+      });
+
+      playbackVideo.pause();
+      playbackVideo.srcObject = null;
     }
 
   </script>
