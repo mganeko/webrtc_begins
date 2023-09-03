@@ -97,6 +97,12 @@
     }
 
     function draw() {
+      /* 円を指定 */
+      ctx.beginPath();
+      ctx.arc(canvas.width/2, canvas.height/2, canvas.height/2, 0, Math.PI*2, false);
+      ctx.clip();
+
+      // 画像を描画
       ctx.drawImage(video,
         //video.videoWidth/2 - video.videoHeight/2, 0, video.videoWidth/2 + video.videoHeight/2, video.videoHeight, // src
         video.videoWidth/2 - video.videoHeight/2, 0, video.videoHeight, video.videoHeight, // src (left, top, width, height)
