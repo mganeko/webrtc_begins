@@ -13,7 +13,7 @@
       background-color: #f1f1f1;
       font-family: Arial, Helvetica, sans-serif;
     ">
-  <h2>Mosic Background</h2>
+  <h2>Mosic</h2>
   <button id="start_video_button" onclick="startVideo()">Start Video</button>
   <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
   <br />
@@ -31,6 +31,13 @@
   <br />
   <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
   <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
+  &nbsp;<span>Mosic:</span>
+  <input type="radio" id="radio_normal" name="mosic" value="none" onchange="setMosic('none')"><label>none</label>
+  <input type="radio" id="radio_mosic_background" name="mosic" value="background" checked="1"
+    onchange="setMosic('background')"><label>background</label>
+  <input type="radio" id="radio_modaic_face" name="mosic" value="face" onchange="setMosic('face')"><label>face</label>
+
+
   <br />
   <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
   <br />
@@ -92,6 +99,11 @@
     playbackVideo.srcObject = null;
   }
 
+  let mosicType = 'background'
+  function setMosic(type) {
+    mosicType = type;
+  }
+
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   const canvasMosaic = document.getElementById("canvas_mosaic");
@@ -121,11 +133,36 @@
   function draw() {
     ctx.save();
 
+    switch (mosicType) {
+      case 'face':
+        // 背景
+        drawBackground();
+        // 顔部分
+        drawClipedCameraMosic()
+        break;
+
+      case 'none':
+        drawBackground();
+        break;
+
+      case 'background':
+        // 背景
+        drawMosic();
+
+        // カメラの切り抜き
+        drawClipedCamera()
+        break;
+    }
+
+    /*--
     // 背景のモザイク
-    drawMosic();
+    //drawMosic();
+    drawBackground();
 
     // カメラの切り抜き
-    drawClipedCamera()
+    //drawClipedCamera()
+    drawClipedCameraMosic()
+    --*/
 
     ctx.restore();
     requestId = requestAnimationFrame(draw);
@@ -145,6 +182,15 @@
     // 画像を描画
     ctx.drawImage(video,
       //video.videoWidth / 2 - video.videoHeight / 2, 0, video.videoHeight, video.videoHeight, // src (left, top, width, height)
+      0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
+      0, 0, canvas.width, canvas.height // dest (left, top, width, height)
+    );
+  }
+
+  // 背景描画
+  // 一瞬、全て描画されてしまうので、本来は望ましくない
+  function drawBackground() {
+    ctx.drawImage(video,
       0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
       0, 0, canvas.width, canvas.height // dest (left, top, width, height)
     );
@@ -170,8 +216,40 @@
       0, 0, smallWidth, smallHeight, // src
       0, 0, canvas.width, canvas.height //dest
     )
-
   }
+
+  function drawClipedCameraMosic() {
+    // モザイクのブロックのサイズ
+    const blockWidth = currentBlockSize; //20;
+    const blockHeight = currentBlockSize; //20;
+
+    // 縮小後の画像サイズ
+    const smallWidth = video.videoWidth / blockWidth;
+    const smallHeight = video.videoHeight / blockHeight;
+
+    // 画像を縮小して描画
+    ctxMosaic.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src
+      0, 0, smallWidth, smallHeight //dest
+    )
+
+    // == 円を指定 ==
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 3;
+    const r = canvas.height / 3;
+
+    ctx.beginPath();
+    //ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, 0, Math.PI * 2, false);
+    ctx.arc(centerX, centerY, r, 0, Math.PI * 2, false);
+    ctx.clip();
+
+    // 画像を再拡大
+    ctx.drawImage(canvasMosaic,
+      0, 0, smallWidth, smallHeight, // src
+      0, 0, canvas.width, canvas.height //dest
+    )
+  }
+
 
   function startCaptureCanvas() {
     capturedCanvasStream = canvas.captureStream();
