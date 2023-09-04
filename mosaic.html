@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Mosic</title>
+  <title>Mosaic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
 </head>
@@ -13,7 +13,7 @@
       background-color: #f1f1f1;
       font-family: Arial, Helvetica, sans-serif;
     ">
-  <h2>Mosic</h2>
+  <h2>Mosaic</h2>
   <button id="start_video_button" onclick="startVideo()">Start Video</button>
   <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
   <br />
@@ -31,11 +31,11 @@
   <br />
   <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
   <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
-  &nbsp;<span>Mosic:</span>
-  <input type="radio" id="radio_normal" name="mosic" value="none" onchange="setMosic('none')"><label>none</label>
-  <input type="radio" id="radio_mosic_background" name="mosic" value="background" checked="1"
-    onchange="setMosic('background')"><label>background</label>
-  <input type="radio" id="radio_modaic_face" name="mosic" value="face" onchange="setMosic('face')"><label>face</label>
+  &nbsp;<span>Mosaic:</span>
+  <input type="radio" id="radio_normal" name="mosaic" value="none" onchange="setMosaic('none')"><label>none</label>
+  <input type="radio" id="radio_mosaic_background" name="mosaic" value="background" checked="1"
+    onchange="setMosaic('background')"><label>background</label>
+  <input type="radio" id="radio_modaic_face" name="mosaic" value="face" onchange="setMosaic('face')"><label>face</label>
 
 
   <br />
@@ -99,9 +99,9 @@
     playbackVideo.srcObject = null;
   }
 
-  let mosicType = 'background'
-  function setMosic(type) {
-    mosicType = type;
+  let mosaicType = 'background'
+  function setMosaic(type) {
+    mosaicType = type;
   }
 
   const canvas = document.getElementById("canvas");
@@ -133,12 +133,12 @@
   function draw() {
     ctx.save();
 
-    switch (mosicType) {
+    switch (mosaicType) {
       case 'face':
         // 背景
         drawBackground();
         // 顔部分
-        drawClipedCameraMosic()
+        drawClipedCameraMosaic()
         break;
 
       case 'none':
@@ -147,7 +147,7 @@
 
       case 'background':
         // 背景
-        drawMosic();
+        drawMosaic();
 
         // カメラの切り抜き
         drawClipedCamera()
@@ -156,12 +156,12 @@
 
     /*--
     // 背景のモザイク
-    //drawMosic();
+    //drawMosaic();
     drawBackground();
 
     // カメラの切り抜き
     //drawClipedCamera()
-    drawClipedCameraMosic()
+    drawClipedCameraMosaic()
     --*/
 
     ctx.restore();
@@ -196,7 +196,7 @@
     );
   }
 
-  function drawMosic() {
+  function drawMosaic() {
     // モザイクのブロックのサイズ
     const blockWidth = currentBlockSize; //20;
     const blockHeight = currentBlockSize; //20;
@@ -218,7 +218,7 @@
     )
   }
 
-  function drawClipedCameraMosic() {
+  function drawClipedCameraMosaic() {
     // モザイクのブロックのサイズ
     const blockWidth = currentBlockSize; //20;
     const blockHeight = currentBlockSize; //20;
