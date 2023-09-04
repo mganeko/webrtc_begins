@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Mosic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+</head>
+
+<body style="
+      margin: 0;
+      padding: 0;
+      background-color: #f1f1f1;
+      font-family: Arial, Helvetica, sans-serif;
+    ">
+  <h2>Mosic Background</h2>
+  <button id="start_video_button" onclick="startVideo()">Start Video</button>
+  <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
+  <br />
+  <video id="video" width="320" height="240" style="border: 1px solid gray;" // border-radius: 50%;
+    filter:grayscale(100%);"></video>
+  <!-- css translform: scale(1.5) では、要素全体が大きくなってしまう。映像だけ大きくすることができない-->
+  <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+
+  <br />
+  <button id="start_capture_button" onclick="startCapture()">Start Capture(video)</button>
+  <button id="stop_capture_button" onclick="stopCapture()">Stop Capture(video)</button>
+  &nbsp;
+  <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture(canvas)</button>
+  <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture(canvas)</button>
+  <br />
+  <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
+  <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
+  <br />
+  <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
+  <br />
+  <input id="block_size_input" type="range" min="1" max="120" value="40" oninput="showCurrentBlockSize()" />
+  &nbsp;
+  <span id="current_block_size"></span>
+  <br />
+  <canvas id="canvas_mosaic" width="640" height="480" style="border: 1px solid gray;"></canvas>
+  <br />
+</body>
+<script>
+  const video = document.getElementById("video");
+  const playbackVideo = document.getElementById("playback_video");
+  let capturedStream = null;
+  let capturedCanvasStream = null;
+
+  async function startVideo() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      .catch(e => {
+        console.error(e);
+        return;
+      });
+    video.srcObject = stream;
+    await video.play().catch(e => console.error(e));
+  }
+
+  function stopVideo() {
+    const stream = video.srcObject;
+    if (!stream) {
+      return;
+    }
+
+    const tracks = stream.getTracks();
+    tracks.forEach(function (track) {
+      track.stop();
+    });
+
+    video.pause();
+    video.srcObject = null;
+  }
+
+  function startCapture() {
+    capturedStream = video.captureStream();
+    playbackVideo.srcObject = capturedStream;
+    playbackVideo.play();
+  }
+
+  function stopCapture() {
+    if (!capturedStream) {
+      return;
+    }
+
+    const tracks = capturedStream.getTracks();
+    tracks.forEach(function (track) {
+      track.stop();
+    });
+
+    playbackVideo.pause();
+    playbackVideo.srcObject = null;
+  }
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const canvasMosaic = document.getElementById("canvas_mosaic");
+  //const canvasMosaic = new OffscreenCanvas(320, 240);;
+  const ctxMosaic = canvasMosaic.getContext("2d");
+  const blockSizeInput = document.getElementById('block_size_input');
+  const blockSizeSpan = document.getElementById('current_block_size');
+  let currentBlockSize = 40;
+
+  function showCurrentBlockSize() {
+    currentBlockSize = blockSizeInput.value;
+    blockSizeSpan.innerText = currentBlockSize;
+  }
+
+  let requestId = null;
+  function startDraw() {
+    requestId = requestAnimationFrame(draw);
+  }
+
+  function stopDraw() {
+    if (requestId) {
+      cancelAnimationFrame(requestId);
+      requestId = null;
+    }
+  }
+
+  function draw() {
+    ctx.save();
+
+    // 背景のモザイク
+    drawMosic();
+
+    // カメラの切り抜き
+    drawClipedCamera()
+
+    ctx.restore();
+    requestId = requestAnimationFrame(draw);
+  }
+
+  function drawClipedCamera() {
+    // == 円を指定 ==
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 3;
+    const r = canvas.height / 3;
+
+    ctx.beginPath();
+    //ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, 0, Math.PI * 2, false);
+    ctx.arc(centerX, centerY, r, 0, Math.PI * 2, false);
+    ctx.clip();
+
+    // 画像を描画
+    ctx.drawImage(video,
+      //video.videoWidth / 2 - video.videoHeight / 2, 0, video.videoHeight, video.videoHeight, // src (left, top, width, height)
+      0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
+      0, 0, canvas.width, canvas.height // dest (left, top, width, height)
+    );
+  }
+
+  function drawMosic() {
+    // モザイクのブロックのサイズ
+    const blockWidth = currentBlockSize; //20;
+    const blockHeight = currentBlockSize; //20;
+
+    // 縮小後の画像サイズ
+    const smallWidth = video.videoWidth / blockWidth;
+    const smallHeight = video.videoHeight / blockHeight;
+
+    // 画像を縮小して描画
+    ctxMosaic.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src
+      0, 0, smallWidth, smallHeight //dest
+    )
+
+    // 画像を再拡大
+    ctx.drawImage(canvasMosaic,
+      0, 0, smallWidth, smallHeight, // src
+      0, 0, canvas.width, canvas.height //dest
+    )
+
+  }
+
+  function startCaptureCanvas() {
+    capturedCanvasStream = canvas.captureStream();
+    playbackVideo.srcObject = capturedCanvasStream;
+    playbackVideo.play();
+  }
+
+  function stopCaptureCanvas() {
+    if (!capturedCanvasStream) {
+      return;
+    }
+
+    const tracks = capturedCanvasStream.getTracks();
+    tracks.forEach(function (track) {
+      track.stop();
+    });
+
+    playbackVideo.pause();
+    playbackVideo.srcObject = null;
+  }
+
+</script>
+
+</html>
