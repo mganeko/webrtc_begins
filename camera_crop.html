@@ -179,6 +179,11 @@
       playbackVideo.play();
     }
 
+    /* --- memo ---
+      Safariでは、video.captureStream()はサポートされていないが、
+      canvas.captureStream()はサポートされている。
+    ----------*/
+
     function stopCaptureCanvas() {
       if (!capturedCanvasStream) {
         return;
