@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Camera</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f1f1f1;
+      font-family: Arial, Helvetica, sans-serif;
+    ">
+    <h2>Camera</h2>
+    <div
+    style="display:grid; grid-template-columns: 360px 360px; column-gap: 2px; row-gap: 2px;">
+      <div>Video from Camera</div>
+      <div>Canvas</div>
+
+      <div>
+        <button id="start_video_button" onclick="startVideo()">Start Video</button>
+        <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>  
+      </div>
+      <div>
+        <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
+        <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>  
+      </div>
+
+      <video id="video" width="320" height="240"
+        style="border: 1px solid gray;" // border-radius: 50%; filter:grayscale(100%);"
+      ></video>
+      <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
+
+      <div>&nbsp;</div>
+      <div>&nbsp;</div>
+
+      <div>Captured MediaStream</div>
+      <div>&nbsp;</div>
+
+      <div>
+        <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture Canvas</button>
+        <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture Canvas</button>    
+      </div>
+      <div>&nbsp;</div>
+
+      <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+      <div>&nbsp;</div>
+    </div>
+  </body>
+  <script>
+    const video = document.getElementById("video");
+    const playbackVideo = document.getElementById("playback_video");
+    let capturedStream = null;
+    let capturedCanvasStream = null;
+
+    async function startVideo() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: {width:640, height:480} })
+        .catch(e => {
+          console.error(e);
+          return;
+        });
+      video.srcObject = stream;
+      await video.play().catch(e => console.error(e));
+    }
+
+    function stopVideo() {
+      const stream = video.srcObject;
+      if (!stream) {
+        return;
+      }
+      stopStream(stream);
+
+      video.pause();
+      video.srcObject = null;
+    }
+
+    function stopStream(stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach(function(track) {
+        track.stop();
+      });
+    }
+
+    function startCapture() {
+      capturedStream = video.captureStream();
+      playbackVideo.srcObject = capturedStream;
+      playbackVideo.play();
+    }
+
+    function stopCapture() {
+      if (!capturedStream) {
+        return;
+      }
+      stopStream(capturedStream);
+
+      playbackVideo.pause();
+      playbackVideo.srcObject = null;
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let requestId = null;
+    function startDraw() {
+      requestId = requestAnimationFrame(draw);
+    }
+
+    function stopDraw() {
+      if (requestId) {
+        cancelAnimationFrame(requestId);
+        requestId = null;
+      }
+      clearCanvas();
+    }
+
+    function draw() {
+      drawClipedVideo();
+
+      requestId = requestAnimationFrame(draw);
+    }
+
+    function drawClipedVideo() {
+      ctx.save();
+      
+      /* 円を指定 */
+      const r = canvas.height/3;
+      const centerX = canvas.width/2;
+      const centerY = canvas.height/3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, r, 0, Math.PI*2, false);
+      ctx.clip();
+
+      // 画像を描画
+      const srcR = r * video.videoHeight / canvas.height;
+      const srcLeft = video.videoWidth/2 - srcR;
+      const srcTop = 0;
+      const srcWidth = srcR * 2;
+      const srcHeight = srcR * 2;
+      ctx.drawImage(video,
+        srcLeft, srcTop, srcWidth, srcHeight, // src (left, top, width, height)
+        centerX-r, 0, r*2, r*2,  // dest (left, top, width, height)
+      );
+
+      ctx.restore();
+    }
+
+    function drawClipedVideo0() {
+      ctx.save();
+
+      /* 円を指定 */
+      const r = canvas.height/2;
+      const centerX = canvas.width/2;
+      const centerY = canvas.height/2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, r, 0, Math.PI*2, false);
+      ctx.clip();
+
+      // 画像を描画
+      const srcR = r * video.videoHeight / canvas.height;
+      const srcLeft = video.videoWidth/2 - srcR;
+      const srcTop = 0;
+      const srcWidth = srcR * 2;
+      const srcHeight = srcR * 2;
+      ctx.drawImage(video,
+        srcLeft, srcTop, srcWidth, srcHeight, // src (left, top, width, height)
+        centerX-r, 0, r*2, r*2,  // dest (left, top, width, height)
+      );
+
+      ctx.restore();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function startCaptureCanvas() {
+      capturedCanvasStream = canvas.captureStream();
+      playbackVideo.srcObject = capturedCanvasStream;
+      playbackVideo.play();
+    }
+
+    function stopCaptureCanvas() {
+      if (!capturedCanvasStream) {
+        return;
+      }
+      stopStream(capturedCanvasStream);
+      capturedCanvasStream = null;
+
+      playbackVideo.pause();
+      playbackVideo.srcObject = null;
+    }
+
+  </script>
+</html>
