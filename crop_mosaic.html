@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Bg Mosaic</title>
+  <title>Crop Mosaic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
 </head>
@@ -13,7 +13,7 @@
       background-color: #f1f1f1;
       font-family: Arial, Helvetica, sans-serif;
     ">
-  <h2>Background Mosaic</h2>
+  <h2>Camera Crop and Mosaic</h2>
   <div style="display:grid; grid-template-columns: 360px 360px; column-gap: 2px; row-gap: 2px;">
     <div>Video from Camera</div>
     <div>&nbsp;</div>
@@ -41,7 +41,13 @@
       &nbsp;
       <span id="current_block_size"></span>
     </div>
-    <div>&nbsp;</div>
+    <div>
+      <span>Mosaic:</span>
+      <input type="radio" id="radio_none" name="mosaic" value="none" onchange="setMosaic('none')"><label>none</label>
+      <input type="radio" id="radio_mosaic_background" name="mosaic" value="background" checked="1"
+    onchange="setMosaic('background')"><label>background</label>
+  <input type="radio" id="radio_modaic_face" name="mosaic" value="face" onchange="setMosaic('face')"><label>face</label>
+    </div>
 
     <canvas id="canvas_work" width="320" height="240" style="border: 1px solid gray;"></canvas>
     <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
@@ -112,6 +118,11 @@
     playbackVideo.srcObject = null;
   }
 
+  let mosaicType = 'background'
+  function setMosaic(type) {
+    mosaicType = type;
+  }
+
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   const canvasWork = document.getElementById("canvas_work");
@@ -134,9 +145,65 @@
   }
 
   function draw() {
-    drawMosaicBackground();
+    //drawMosaicBackground();
+    //drawClipedVideo()
+
+    switch (mosaicType) {
+      case 'face':
+        // 背景
+        drawBackground();
+        // 顔部分
+        drawClipedCameraMosaic()
+        break;
+
+      case 'none':
+        drawBackground();
+        break;
+
+      case 'background':
+        // 背景
+        drawMosaicBackground();
+
+        // カメラの切り抜き
+        drawClipedCamera()
+        break;
+    }
 
     requestId = requestAnimationFrame(draw);
+  }
+
+  function drawClipedCamera() {
+    ctx.save();
+
+    /* 円を指定 */
+    const r = canvas.height / 3;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 3;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, r, 0, Math.PI * 2, false);
+    ctx.clip();
+
+    // 画像を描画
+    const srcR = r * video.videoHeight / canvas.height;
+    const srcLeft = video.videoWidth / 2 - srcR;
+    const srcTop = 0;
+    const srcWidth = srcR * 2;
+    const srcHeight = srcR * 2;
+    ctx.drawImage(video,
+      srcLeft, srcTop, srcWidth, srcHeight, // src (left, top, width, height)
+      centerX - r, 0, r * 2, r * 2,  // dest (left, top, width, height)
+    );
+
+    ctx.restore();
+  }
+
+  // 背景描画
+  // 一瞬、全て描画されてしまうので、本来は望ましくない
+  function drawBackground() {
+    ctx.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
+      0, 0, canvas.width, canvas.height // dest (left, top, width, height)
+    );
   }
 
   function drawMosaicBackground() {
@@ -159,6 +226,37 @@
       0, 0, smallWidth, smallHeight, // src
       0, 0, canvas.width, canvas.height //dest
     );
+  }
+
+  function drawClipedCameraMosaic() {
+    // モザイクのブロックのサイズ
+    const blockWidth = currentBlockSize; //20;
+    const blockHeight = currentBlockSize; //20;
+
+    // 縮小後の画像サイズ
+    const smallWidth = video.videoWidth / blockWidth;
+    const smallHeight = video.videoHeight / blockHeight;
+
+    // 画像を縮小して描画
+    ctxWork.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src
+      0, 0, smallWidth, smallHeight //dest
+    )
+
+    // == 円を指定 ==
+    /* 円を指定 */
+    const r = canvas.height / 3;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 3;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, r, 0, Math.PI * 2, false);
+    ctx.clip();
+
+    // 画像を再拡大
+    ctx.drawImage(canvasWork,
+      0, 0, smallWidth, smallHeight, // src
+      0, 0, canvas.width, canvas.height //dest
+    )
   }
 
   function showCurrentBlockSize() {
