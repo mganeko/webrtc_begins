@@ -96,21 +96,21 @@
     });
   }
 
-  function startCapture() {
-    capturedStream = video.captureStream();
-    playbackVideo.srcObject = capturedStream;
-    playbackVideo.play();
-  }
+  // function startCapture() {
+  //   capturedStream = video.captureStream();
+  //   playbackVideo.srcObject = capturedStream;
+  //   playbackVideo.play();
+  // }
 
-  function stopCapture() {
-    if (!capturedStream) {
-      return;
-    }
-    stopStream(capturedStream);
+  // function stopCapture() {
+  //   if (!capturedStream) {
+  //     return;
+  //   }
+  //   stopStream(capturedStream);
 
-    playbackVideo.pause();
-    playbackVideo.srcObject = null;
-  }
+  //   playbackVideo.pause();
+  //   playbackVideo.srcObject = null;
+  // }
 
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");

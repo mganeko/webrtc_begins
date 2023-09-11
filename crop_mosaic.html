@@ -24,8 +24,8 @@
     </div>
     <div>&nbsp;</div>
 
-    <video id="video" width="320" height="240" style="border: 1px solid gray;" // border-radius: 50%;
-      filter:grayscale(100%);"></video>
+    <video id="video" width="320" height="240" style="border: 1px solid gray; "></video>
+    <!-- display:none でも描画可能　-->
     <div>&nbsp;</div>
 
     <div>&nbsp;</div>
@@ -51,6 +51,7 @@
 
     <canvas id="canvas_work" width="320" height="240" style="border: 1px solid gray;"></canvas>
     <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
+    <!-- display:none でも描画可能、CaptureStream可能　-->
 
     <div>&nbsp;</div>
     <div>&nbsp;</div>
@@ -62,7 +63,9 @@
       <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture Canvas</button>
       <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture Canvas</button>
     </div>
-    <div>&nbsp;</div>
+    <div>
+      <button id="stop_all_button" onclick="stopAll()">Stop All</button>      
+    </div>
 
     <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
     <div>&nbsp;</div>
@@ -73,6 +76,12 @@
   const playbackVideo = document.getElementById("playback_video");
   let capturedStream = null;
   let capturedCanvasStream = null;
+
+  function stopAll() {
+    stopCaptureCanvas();
+    stopDraw(); 
+    stopVideo();
+  }
 
   async function startVideo() {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
@@ -102,21 +111,21 @@
     });
   }
 
-  function startCapture() {
-    capturedStream = video.captureStream();
-    playbackVideo.srcObject = capturedStream;
-    playbackVideo.play();
-  }
+  // function startCapture() {
+  //   capturedStream = video.captureStream();
+  //   playbackVideo.srcObject = capturedStream;
+  //   playbackVideo.play();
+  // }
 
-  function stopCapture() {
-    if (!capturedStream) {
-      return;
-    }
-    stopStream(capturedStream);
+  // function stopCapture() {
+  //   if (!capturedStream) {
+  //     return;
+  //   }
+  //   stopStream(capturedStream);
 
-    playbackVideo.pause();
-    playbackVideo.srcObject = null;
-  }
+  //   playbackVideo.pause();
+  //   playbackVideo.srcObject = null;
+  // }
 
   let mosaicType = 'background'
   function setMosaic(type) {
@@ -124,9 +133,13 @@
   }
 
   const canvas = document.getElementById("canvas");
+  //const canvas = new OffscreenCanvas(640, 480); // NG, captureStream()できない
   const ctx = canvas.getContext("2d");
-  const canvasWork = document.getElementById("canvas_work");
+
+  const canvasWork = document.getElementById("canvas_work");  
+  //const canvasWork = new OffscreenCanvas(640, 480); // OK
   const ctxWork = canvasWork.getContext("2d");
+  
   const blockSizeInput = document.getElementById('block_size_input');
   const blockSizeSpan = document.getElementById('current_block_size');
   let currentBlockSize = 40;
