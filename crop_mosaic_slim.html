@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Crop Mosaic</title>
+  <title>Slim Mosaic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
 </head>
@@ -13,64 +13,25 @@
       background-color: #f1f1f1;
       font-family: Arial, Helvetica, sans-serif;
     ">
-  <h2>Camera Crop and Mosaic</h2>
-  <div style="display:grid; grid-template-columns: 360px 360px; column-gap: 2px; row-gap: 2px;">
-    <div>Video from Camera</div>
-    <div>&nbsp;</div>
+  <h2>Mosaic Camera Slim</h2>
+  <div>Video for canvas captured streama</div>
+  <div>
+    <button id="start_all_button" onclick="startAll()">Start All</button>
+    <button id="stop_all_button" onclick="stopAll()">Stop All</button>      
+  </div>
+  <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+  <video id="video" width="320" height="240" style="border: 1px solid gray; display:none"></video>
+  <canvas id="canvas" width="320" height="240" style="border: 1px solid gray; display:none"></canvas>
 
-    <div>
-      <button id="start_video_button" onclick="startVideo()">Start Video</button>
-      <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
-    </div>
-    <div>
-      <button id="start_all_button" onclick="startAll()">Start All</button>
-    </div>
-
-    <video id="video" width="320" height="240" style="border: 1px solid gray; "></video>
-    <!-- display:none でも描画可能　-->
-    <div>&nbsp;</div>
-
-    <div>&nbsp;</div>
-    <div>&nbsp;</div>
-
-    <div>Work Canvas</div>
-    <div>Mosaic Canvas</div>
-
-    <div>
-      <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
-      <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
-      <input id="block_size_input" type="range" min="2" max="120" value="40" oninput="showCurrentBlockSize()" />
-      &nbsp;
-      <span id="current_block_size"></span>
-    </div>
-    <div>
-      <span>Mosaic:</span>
-      <input type="radio" id="radio_none" name="mosaic" value="none" onchange="setMosaic('none')"><label>none</label>
-      <input type="radio" id="radio_mosaic_background" name="mosaic" value="background" checked="1"
-    onchange="setMosaic('background')"><label>background</label>
-  <input type="radio" id="radio_modaic_face" name="mosaic" value="face" onchange="setMosaic('face')"><label>face</label>
-    </div>
-
-    <canvas id="canvas_work" width="320" height="240" style="border: 1px solid gray;"></canvas>
-    <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
-    <!-- display:none でも描画可能、CaptureStream可能　-->
-
-    <div>&nbsp;</div>
-    <div>&nbsp;</div>
-
-    <div>Captured MediaStream</div>
-    <div>&nbsp;</div>
-
-    <div>
-      <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture Canvas</button>
-      <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture Canvas</button>
-    </div>
-    <div>
-      <button id="stop_all_button" onclick="stopAll()">Stop All</button>      
-    </div>
-
-    <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
-    <div>&nbsp;</div>
+  <div>
+    <input id="block_size_input" type="range" min="2" max="120" value="40" oninput="showCurrentBlockSize()" />
+    &nbsp;
+    <span id="current_block_size"></span>
+    &nbsp;&nbsp;
+    <span>Mosaic:</span>
+    <input type="radio" id="radio_none" name="mosaic" value="none" onchange="setMosaic('none')"><label>none</label>
+    <input type="radio" id="radio_mosaic_background" name="mosaic" value="background" checked="1" onchange="setMosaic('background')"><label>background</label>
+    <input type="radio" id="radio_modaic_face" name="mosaic" value="face" onchange="setMosaic('face')"><label>face</label>
   </div>
 </body>
 <script>
@@ -144,8 +105,8 @@
   //const canvas = new OffscreenCanvas(640, 480); // NG, captureStream()できない
   const ctx = canvas.getContext("2d");
 
-  const canvasWork = document.getElementById("canvas_work");  
-  //const canvasWork = new OffscreenCanvas(640, 480); // OK
+  //const canvasWork = document.getElementById("canvas_work");  
+  const canvasWork = new OffscreenCanvas(640, 480); // OK
   const ctxWork = canvasWork.getContext("2d");
   
   const blockSizeInput = document.getElementById('block_size_input');
