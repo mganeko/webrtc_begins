@@ -22,7 +22,9 @@
       <button id="start_video_button" onclick="startVideo()">Start Video</button>
       <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
     </div>
-    <div>&nbsp;</div>
+    <div>
+      <button id="start_all_button" onclick="startAll()">Start All</button>
+    </div>
 
     <video id="video" width="320" height="240" style="border: 1px solid gray; "></video>
     <!-- display:none でも描画可能　-->
@@ -76,6 +78,12 @@
   const playbackVideo = document.getElementById("playback_video");
   let capturedStream = null;
   let capturedCanvasStream = null;
+
+  async function startAll() {
+    await startVideo();
+    startDraw();
+    startCaptureCanvas();
+  }
 
   function stopAll() {
     stopCaptureCanvas();

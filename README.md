@@ -10,6 +10,6 @@
     - [x] シンプル（一瞬、顔も描画する）
     - [ ] 丁寧 （一瞬たりとも、顔を描画しない）
   - [ ] localVideo 隠す
-  - [ ] OffScreenCanvas
-  - [ ] captureStream() from OffScreenCanvas
+  - [x] OffScreenCanvas
+  - [-] captureStream() from OffScreenCanvas --> NG
   
