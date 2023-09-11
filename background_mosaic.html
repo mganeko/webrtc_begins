@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Bg Mosaic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+</head>
+
+<body style="
+      margin: 0;
+      padding: 0;
+      background-color: #f1f1f1;
+      font-family: Arial, Helvetica, sans-serif;
+    ">
+  <h2>Background Mosaic</h2>
+  <div style="display:grid; grid-template-columns: 360px 360px; column-gap: 2px; row-gap: 2px;">
+    <div>Video from Camera</div>
+    <div>&nbsp;</div>
+
+    <div>
+      <button id="start_video_button" onclick="startVideo()">Start Video</button>
+      <button id="stop_video_button" onclick="stopVideo()">Stop Video</button>
+    </div>
+    <div>&nbsp;</div>
+
+    <video id="video" width="320" height="240" style="border: 1px solid gray;" // border-radius: 50%;
+      filter:grayscale(100%);"></video>
+    <div>&nbsp;</div>
+
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+
+    <div>Work Canvas</div>
+    <div>Mosaic Cnavas</div>
+
+    <div>
+      <button id="start_draw_button" onclick="startDraw()">Start Draw</button>
+      <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
+      <input id="block_size_input" type="range" min="2" max="120" value="40" oninput="showCurrentBlockSize()" />
+      &nbsp;
+      <span id="current_block_size"></span>
+    </div>
+    <div>&nbsp;</div>
+
+    <canvas id="canvas_work" width="320" height="240" style="border: 1px solid gray;"></canvas>
+    <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
+
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+
+    <div>Captured MediaStream</div>
+    <div>&nbsp;</div>
+
+    <div>
+      <button id="start_capture_canvas_button" onclick="startCaptureCanvas()">Start Capture Canvas</button>
+      <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture Canvas</button>
+    </div>
+    <div>&nbsp;</div>
+
+    <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+    <div>&nbsp;</div>
+  </div>
+</body>
+<script>
+  const video = document.getElementById("video");
+  const playbackVideo = document.getElementById("playback_video");
+  let capturedStream = null;
+  let capturedCanvasStream = null;
+
+  async function startVideo() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+      .catch(e => {
+        console.error(e);
+        return;
+      });
+    video.srcObject = stream;
+    await video.play().catch(e => console.error(e));
+  }
+
+  function stopVideo() {
+    const stream = video.srcObject;
+    if (!stream) {
+      return;
+    }
+    stopStream(stream);
+
+    video.pause();
+    video.srcObject = null;
+  }
+
+  function stopStream(stream) {
+    const tracks = stream.getTracks();
+    tracks.forEach(function (track) {
+      track.stop();
+    });
+  }
+
+  function startCapture() {
+    capturedStream = video.captureStream();
+    playbackVideo.srcObject = capturedStream;
+    playbackVideo.play();
+  }
+
+  function stopCapture() {
+    if (!capturedStream) {
+      return;
+    }
+    stopStream(capturedStream);
+
+    playbackVideo.pause();
+    playbackVideo.srcObject = null;
+  }
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const canvasWork = document.getElementById("canvas_work");
+  const ctxWork = canvasWork.getContext("2d");
+  const blockSizeInput = document.getElementById('block_size_input');
+  const blockSizeSpan = document.getElementById('current_block_size');
+  let currentBlockSize = 40;
+
+  let requestId = null;
+  function startDraw() {
+    requestId = requestAnimationFrame(draw);
+  }
+
+  function stopDraw() {
+    if (requestId) {
+      cancelAnimationFrame(requestId);
+      requestId = null;
+    }
+    clearCanvas();
+  }
+
+  function draw() {
+    drawMosaicBackground();
+
+    requestId = requestAnimationFrame(draw);
+  }
+
+  function drawMosaicBackground() {
+    // モザイクのブロックのサイズ
+    const blockWidth = currentBlockSize;
+    const blockHeight = currentBlockSize;
+
+    // 縮小後の画像サイズ
+    const smallWidth = video.videoWidth / blockWidth;
+    const smallHeight = video.videoHeight / blockHeight;
+
+    // 画像を縮小して描画
+    ctxWork.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src
+      0, 0, smallWidth, smallHeight //dest
+    );
+
+    // 画像を再拡大
+    ctx.drawImage(canvasWork,
+      0, 0, smallWidth, smallHeight, // src
+      0, 0, canvas.width, canvas.height //dest
+    );
+  }
+
+  function showCurrentBlockSize() {
+    currentBlockSize = blockSizeInput.value;
+    blockSizeSpan.innerText = currentBlockSize;
+    clearWorkCanvas();
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctxWork.clearRect(0, 0, canvasWork.width, canvasWork.height);
+  }
+
+  function clearWorkCanvas() {
+    ctxWork.clearRect(0, 0, canvasWork.width, canvasWork.height);
+  }
+
+  function startCaptureCanvas() {
+    capturedCanvasStream = canvas.captureStream();
+    playbackVideo.srcObject = capturedCanvasStream;
+    playbackVideo.play();
+  }
+
+  /* --- memo ---
+    Safariでは、video.captureStream()はサポートされていないが、
+    canvas.captureStream()はサポートされている。
+  ----------*/
+
+  function stopCaptureCanvas() {
+    if (!capturedCanvasStream) {
+      return;
+    }
+    stopStream(capturedCanvasStream);
+    capturedCanvasStream = null;
+
+    playbackVideo.pause();
+    playbackVideo.srcObject = null;
+  }
+
+</script>
+
+</html>
