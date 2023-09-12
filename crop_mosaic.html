@@ -92,6 +92,10 @@
   }
 
   async function startVideo() {
+    if (video.srcObject) {
+      return;
+    }
+    
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
       .catch(e => {
         console.error(e);

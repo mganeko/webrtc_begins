@@ -17,6 +17,8 @@
   - [x] canvas非表示 (display:none)
   - [x] workCanvas は offScreenCanvas
 - [ ] README
-- [ ] index
+- [x] index
+- [ ] P2P
+  - Sender - Receiver Skyway
 
 
