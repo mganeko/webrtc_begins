@@ -12,8 +12,11 @@
   - [x] localVideo 隠す (display:none)
   - [x] OffScreenCanvas
   - [-] captureStream() from OffScreenCanvas --> NG
-- [ ] 見た目のスリム化 (余計なものは非表示、offScreenCanvas)
-  - [ ] video非表示 (display:none)
-  - [ ] canvas非表示 (display:none)
-  - [ ] workCanvas は offScreenCanvas
-  
+- [x] 見た目のスリム化 (余計なものは非表示、offScreenCanvas)
+  - [x] video非表示 (display:none)
+  - [x] canvas非表示 (display:none)
+  - [x] workCanvas は offScreenCanvas
+- [ ] README
+- [ ] index
+
+
