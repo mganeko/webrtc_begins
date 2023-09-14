@@ -188,11 +188,29 @@
   // 背景描画
   // 一瞬、全て描画されてしまうので、本来は望ましくない
   function drawBackground() {
+    // 拡大率の決定
+    const zoomX = canvas.width / video.videoWidth;
+    const zoomY = canvas.height / video.videoHeight;
+    const zoomRate = Math.min(zoomX, zoomY);
+    const destWidth = video.videoWidth * zoomRate;
+    const destHeight = video.videoHeight * zoomRate;
+    const destLeft = (canvas.width - destWidth) / 2;
+    const destTop = (canvas.height - destHeight) / 2;
+
+    ctx.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
+      destLeft, destTop, destWidth, destHeight // dest (left, top, width, height)
+    );
+  }
+
+  /*---
+  function drawBackground() {
     ctx.drawImage(video,
       0, 0, video.videoWidth, video.videoHeight, // src (left, top, width, height)
       0, 0, canvas.width, canvas.height // dest (left, top, width, height)
     );
   }
+  ---*/
 
   /*---
   function drawMosaicBackground() {
