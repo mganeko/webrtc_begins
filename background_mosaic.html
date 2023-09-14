@@ -184,7 +184,8 @@
     const zoomRate = Math.min(zoomX, zoomY);
     const zoomWidth = smallWidth * zoomRate;
     const zoomHeight = smallHeight * zoomRate;
-
+    const zoomLeft = (canvas.width - zoomWidth) / 2;
+    const zoomTop = (canvas.height - zoomHeight) / 2;
 
     // 画像を再拡大
     // ctx.drawImage(canvasWork,
@@ -194,7 +195,7 @@
 
     ctx.drawImage(canvasWork,
       0, 0, smallWidth, smallHeight, // src
-      0, 0, zoomWidth, zoomHeight //dest
+      zoomLeft, zoomTop, zoomWidth, zoomHeight //dest
     );
 
   }
