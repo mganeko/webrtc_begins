@@ -26,7 +26,7 @@
       <button id="start_all_button" onclick="startAll()">Start All</button>
     </div>
 
-    <video id="video" width="320" height="240" style="border: 1px solid gray; "></video>
+    <video id="video" width="320" height="240" playsinline style="border: 1px solid gray; "></video>
     <!-- display:none でも描画可能　-->
     <div>&nbsp;</div>
 
@@ -47,8 +47,9 @@
       <span>Mosaic:</span>
       <input type="radio" id="radio_none" name="mosaic" value="none" onchange="setMosaic('none')"><label>none</label>
       <input type="radio" id="radio_mosaic_background" name="mosaic" value="background" checked="1"
-    onchange="setMosaic('background')"><label>background</label>
-  <input type="radio" id="radio_modaic_face" name="mosaic" value="face" onchange="setMosaic('face')"><label>face</label>
+        onchange="setMosaic('background')"><label>background</label>
+      <input type="radio" id="radio_modaic_face" name="mosaic" value="face"
+        onchange="setMosaic('face')"><label>face</label>
     </div>
 
     <canvas id="canvas_work" width="320" height="240" style="border: 1px solid gray;"></canvas>
@@ -66,10 +67,11 @@
       <button id="stop_capture_canvas_button" onclick="stopCaptureCanvas()">Stop Capture Canvas</button>
     </div>
     <div>
-      <button id="stop_all_button" onclick="stopAll()">Stop All</button>      
+      <button id="stop_all_button" onclick="stopAll()">Stop All</button>
     </div>
 
-    <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+    <video id="playback_video" width="320" height="240" controls="1" playsinline
+      style="border: 1px solid gray;"></video>
     <div>&nbsp;</div>
   </div>
 </body>
@@ -87,7 +89,7 @@
 
   function stopAll() {
     stopCaptureCanvas();
-    stopDraw(); 
+    stopDraw();
     stopVideo();
   }
 
@@ -95,7 +97,7 @@
     if (video.srcObject) {
       return;
     }
-    
+
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
       .catch(e => {
         console.error(e);
@@ -148,10 +150,10 @@
   //const canvas = new OffscreenCanvas(640, 480); // NG, captureStream()できない
   const ctx = canvas.getContext("2d");
 
-  const canvasWork = document.getElementById("canvas_work");  
+  const canvasWork = document.getElementById("canvas_work");
   //const canvasWork = new OffscreenCanvas(640, 480); // OK
   const ctxWork = canvasWork.getContext("2d");
-  
+
   const blockSizeInput = document.getElementById('block_size_input');
   const blockSizeSpan = document.getElementById('current_block_size');
   let currentBlockSize = 40;
