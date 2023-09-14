@@ -182,8 +182,8 @@
     const zoomX = canvas.width / smallWidth;
     const zoomY = canvas.heigh / smallHeight;
     const zoomRate = Math.min(zoomX, zoomY);
-    const zoomWidth = smallWidth * zoomWidth;
-    const zoomHeight = csmallHeight * zoomHeight;
+    const zoomWidth = smallWidth * zoomRate;
+    const zoomHeight = smallHeight * zoomRate;
 
 
     // 画像を再拡大
