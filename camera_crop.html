@@ -27,7 +27,7 @@
       <button id="stop_draw_button" onclick="stopDraw()">Stop Draw</button>
     </div>
 
-    <video id="video" width="320" height="240" style="border: 1px solid gray;" // border-radius: 50%;
+    <video id="video" width="320" height="240" playsinline style="border: 1px solid gray;" // border-radius: 50%;
       filter:grayscale(100%);"></video>
     <canvas id="canvas" width="320" height="240" style="border: 1px solid gray;"></canvas>
 
@@ -43,7 +43,8 @@
     </div>
     <div>&nbsp;</div>
 
-    <video id="playback_video" width="320" height="240" controls="1" style="border: 1px solid gray;"></video>
+    <video id="playback_video" width="320" height="240" controls="1" playsinline
+      style="border: 1px solid gray;"></video>
     <div>&nbsp;</div>
   </div>
 </body>
