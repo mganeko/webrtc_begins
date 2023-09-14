@@ -187,10 +187,16 @@
 
 
     // 画像を再拡大
+    // ctx.drawImage(canvasWork,
+    //   0, 0, smallWidth, smallHeight, // src
+    //   0, 0, canvas.width, canvas.height //dest
+    // );
+
     ctx.drawImage(canvasWork,
       0, 0, smallWidth, smallHeight, // src
-      0, 0, canvas.width, canvas.height //dest
+      0, 0, zoomWidth, zoomHeight //dest
     );
+
   }
 
   function showCurrentBlockSize() {
