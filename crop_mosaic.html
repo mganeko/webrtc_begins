@@ -233,6 +233,7 @@
     );
   }
 
+  /*---
   function drawMosaicBackground() {
     // モザイクのブロックのサイズ
     const blockWidth = currentBlockSize;
@@ -252,6 +253,37 @@
     ctx.drawImage(canvasWork,
       0, 0, smallWidth, smallHeight, // src
       0, 0, canvas.width, canvas.height //dest
+    );
+  }
+  ---*/
+
+  function drawMosaicBackground() {
+    // モザイクのブロックのサイズ
+    const blockWidth = currentBlockSize;
+    const blockHeight = currentBlockSize;
+
+    // 縮小後の画像サイズ
+    const smallWidth = video.videoWidth / blockWidth;
+    const smallHeight = video.videoHeight / blockHeight;
+
+    // 画像を縮小して描画
+    ctxWork.drawImage(video,
+      0, 0, video.videoWidth, video.videoHeight, // src
+      0, 0, smallWidth, smallHeight //dest
+    );
+
+    // 拡大率の決定
+    const zoomX = canvas.width / smallWidth;
+    const zoomY = canvas.height / smallHeight;
+    const zoomRate = Math.min(zoomX, zoomY);
+    const zoomWidth = smallWidth * zoomRate;
+    const zoomHeight = smallHeight * zoomRate;
+    const zoomLeft = (canvas.width - zoomWidth) / 2;
+    const zoomTop = (canvas.height - zoomHeight) / 2;
+
+    ctx.drawImage(canvasWork,
+      0, 0, smallWidth, smallHeight, // src
+      zoomLeft, zoomTop, zoomWidth, zoomHeight //dest
     );
   }
 

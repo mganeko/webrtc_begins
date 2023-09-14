@@ -135,13 +135,12 @@
   }
 
   function draw() {
-    //drawMosaicBackground();
-    drawMosaicBackground2();
+    drawMosaicBackground();
 
     requestId = requestAnimationFrame(draw);
   }
 
-  function drawMosaicBackground() {
+  function drawMosaicBackground0() {
     // モザイクのブロックのサイズ
     const blockWidth = currentBlockSize;
     const blockHeight = currentBlockSize;
@@ -163,7 +162,7 @@
     );
   }
 
-  function drawMosaicBackground2() {
+  function drawMosaicBackground() {
     // モザイクのブロックのサイズ
     const blockWidth = currentBlockSize;
     const blockHeight = currentBlockSize;
@@ -187,17 +186,10 @@
     const zoomLeft = (canvas.width - zoomWidth) / 2;
     const zoomTop = (canvas.height - zoomHeight) / 2;
 
-    // 画像を再拡大
-    // ctx.drawImage(canvasWork,
-    //   0, 0, smallWidth, smallHeight, // src
-    //   0, 0, canvas.width, canvas.height //dest
-    // );
-
     ctx.drawImage(canvasWork,
       0, 0, smallWidth, smallHeight, // src
       zoomLeft, zoomTop, zoomWidth, zoomHeight //dest
     );
-
   }
 
   function showCurrentBlockSize() {
