@@ -52,13 +52,20 @@ const token = new SkyWayAuthToken({
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
 
+  /*
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
   video.attach(localVideo);
   await localVideo.play();
+  */
 
   joinButton.onclick = async () => {
     if (roomNameInput.value === '') return;
+
+    const { audio, video } =
+    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+    video.attach(localVideo);
+    await localVideo.play();
 
     const context = await SkyWayContext.Create(token);
     const room = await SkyWayRoom.FindOrCreate(context, {
